@@ -1,66 +1,197 @@
 import React, { useState } from "react";
+import axios from "axios";
 import { useForm } from "react-hook-form";
+import { json, useNavigate } from "react-router-dom";
 import "remixicon/fonts/remixicon.css";
-
+import { toast } from "react-hot-toast";
 
 const HomePage = () => {
   const [flag, setFlag] = useState(true);
-  const [login_pass, setLogin_pass] = useState(true);
-  const [signUp_pass, setSignUp_pass] = useState(true);
-  const [signUp_c_pass, setSignUp_c_pass] = useState(true);
+  const [loginPassVisible, setLoginPassVisible] = useState(false);
+  const [signUpPassVisible, setSignUpPassVisible] = useState(false);
+  const [signUpConfirmPassVisible, setSignUpConfirmPassVisible] =
+    useState(false);
+  const [guestLogin, setGuestLogin] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [imageUrl, setImageUrl] = useState("");
+  const [image, setImage] = useState(null);
 
-  const { register, handleSubmit, reset, formState, watch } = useForm();
+  const navigate = useNavigate();
 
-  // formState hives error messages
+  const { register, handleSubmit, reset, formState, watch, setValue } =
+    useForm();
+
   const { errors } = formState;
 
   // handle submit for login form
-  const handleLogin = (data) => {
+  const handleLogin = async (data) => {
     reset();
-    console.log(data);
-    console.log(data.email);
-    console.log(data.password);
+    const { email, password } = data;
+    setLoading(true);
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      };
+
+      const res = await axios.post(
+        "http://localhost:8080/api/user/login",
+        {
+          email: email,
+          password: password,
+        },
+        config
+      );
+
+      localStorage.setItem("userInfo", JSON.stringify(res.data));
+
+      if (res.status === 200) {
+        setLoading(false);
+        navigate("/chat");
+        toast.success("Login Successful");
+      } else {
+        toast.error("Invalid email or password");
+      }
+    } catch (error) {
+      toast.error("An error occurred during login. Please try again.");
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // handle submit  for signup form
-  const handleSignUp = (data) => {
-    reset();
-    console.log(data);
-    console.log(data.email);
-    console.log(data.password);
-    console.log(data.confirm_password);
-    console.log(data.profileImage);
+  // handle submit for signup form
+
+  // uploading image to cloudinary
+  const uploadImage = async () => {
+    if (!image) {
+      toast.error("Please select an image to upload.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", image);
+    formData.append("upload_preset", "chat_app");
+    formData.append("cloud_name", "dqcovwxpe");
+
+    try {
+      const res = await fetch(
+        "https://api.cloudinary.com/v1_1/dqcovwxpe/image/upload",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      const data = await res.json();
+      if (data.url) {
+        setImageUrl(data.url);
+        toast.success("Image uploaded successfully.");
+        return data.url; // Return image URL for further use
+      } else {
+        throw new Error("Failed to upload image.");
+      }
+    } catch (err) {
+      console.error("Error uploading image to Cloudinary:", err);
+      toast.error("Failed to upload image. Please try again.");
+      throw err; // Throw error to handle in the calling function
+    }
   };
-  // toggles for switch in between ligin and sign up
+
+  //register User
+  const registerUser = async (imageUrl, data) => {
+    const { name, email, password } = data;
+
+    setLoading(true);
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      };
+
+      const userRes = await axios.post(
+        "http://localhost:8080/api/user/register",
+        {
+          name: name,
+          email: email,
+          password: password,
+          picture: imageUrl,
+        },
+        config
+      );
+
+      localStorage.setItem("userInfo", JSON.stringify(userRes.data));
+      setLoading(false);
+      if (userRes.status === 201) {
+        toast.success("Signup Successful");
+        navigate("/chat");
+      } else {
+        toast.error("Signup failed. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error registering user:", error);
+      toast.error("Failed to register. Please try again.");
+      setLoading(false);
+    }
+  };
+
+  
+  const handleSignUp = async (data) => {
+    reset();
+    setLoading(true);
+
+    try {
+      const imageUrl = await uploadImage();
+      if (imageUrl) {
+        await registerUser(imageUrl, data);
+      }
+    } catch (error) {
+      console.error("Error during signup process:", error);
+      toast.error("Failed to complete signup. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // toggles for switching between login and sign up
   const handleToggle = () => {
     setFlag(!flag);
+    reset();
+    setGuestLogin(false);
   };
 
-  // toggles for switch hide and show password functionality (login)
-  const handleLogin_pass = () => {
-    setLogin_pass(!login_pass);
+  // toggles for show/hide password functionality
+  const handleLoginPassVisible = () => {
+    setLoginPassVisible(!loginPassVisible);
   };
 
-  // toggles for switch hide and show password functionality (signup password)
-  const handleSignUp_pass = () => {
-    setSignUp_pass(!signUp_pass);
+  const handleSignUpPassVisible = () => {
+    setSignUpPassVisible(!signUpPassVisible);
   };
 
-  // toggles for switch hide and show password functionality (signup confirm password)
-  const handleSignUp_c_pass = () => {
-    setSignUp_c_pass(!signUp_c_pass);
+  const handleSignUpConfirmPassVisible = () => {
+    setSignUpConfirmPassVisible(!signUpConfirmPassVisible);
   };
-//fetching value of password to create validation on signup confirm password
+
   const password = watch("password");
 
+  const handleGuestLogin = () => {
+    setValue("email", "Guest@gmail.com");
+    setValue("password", "guest123");
+    setGuestLogin(true);
+  };
+
+  //setting image on change
+  const handleImageChange = (e) => {
+    setImage(e.target.files[0]);
+  };
+
   return (
-    <div className="flex justify-center items-center w-full min-h-screen bg-zinc-800">
-      {/* form container */}
-
-      <div className="Form_container flex overflow-hidden w-3/5 bg-white rounded-2xl h-[80%]">
-        {/* form image left container  */}
-
-        <div className="left_container w-1/2 bg-purple-500 ">
+    <div className="flex justify-center items-center w-full min-h-screen bg-zinc-800 py-5 md:py-0">
+      <div className="Form_container flex flex-col md:flex-row overflow-hidden w-5/6 sm:w-3/5 md:w-5/6 lg:w-3/5 bg-white rounded-2xl h-[80%]">
+        <div className="left_container md:w-1/2 bg-purple-500">
           <img
             className="h-full object-contain"
             src="\src\assets\Register.jpg"
@@ -68,8 +199,8 @@ const HomePage = () => {
           />
         </div>
 
-        <div className="right-page flex flex-col gap-10 w-1/2 bg-zinc-100 p-10">
-          <div className="option flex gap-5 p-1">
+        <div className="right-page flex flex-col gap-5 md:w-1/2 bg-zinc-100 p-6 md:p-7">
+          <div className="option text-sm md:text-base flex gap-5 p-1">
             <button
               type="button"
               onClick={handleToggle}
@@ -91,90 +222,17 @@ const HomePage = () => {
           </div>
 
           {flag ? (
-            //login form
             <form
               onSubmit={handleSubmit(handleLogin)}
-              className="flex flex-col gap-4"
+              className="flex flex-col gap-3 md:gap-4"
               noValidate
             >
-              <label className="text-zinc-500 text-xl" htmlFor="email">
+              <label className="text-zinc-500 md:text-xl" htmlFor="email">
                 Email
               </label>
               <div className="flex flex-col">
                 <input
-                  className=" p-4 rounded-xl outline-none text-zinc-600"
-                  type="email"
-                  {...register("email", {
-                    required: {
-                      value: true,
-                      message: "Please enter email",
-                    },
-                    pattern: {
-                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                      message: "Invalid email address",
-                    },
-                  })}
-                  placeholder="Emailid@gmail.com"
-                />
-                <span className="text-red-500">{errors.email?.message}</span>
-              </div>
-
-              <label className="text-zinc-500 text-xl" htmlFor="password">
-                Password
-              </label>
-              <div className="flex flex-col">
-                <div className="flex justify-between p-4 bg-white rounded-xl">
-                  <input
-                    className="flex-1  outline-none text-zinc-600"
-                    type={login_pass ? "text" : "password"}
-                    {...register("password", {
-                      required: {
-                        value: true,
-                        message: "Please enter your password",
-                      },
-                    })}
-                    placeholder="Password"
-                  />
-                  <button
-                    type="button"
-                    className="outline-none"
-                    onClick={handleLogin_pass}
-                  >
-                    {login_pass ? (
-                      <i className="ri-eye-off-line text-purple-500" />
-                    ) : (
-                      <i className="ri-eye-line text-purple-500" />
-                    )}
-                  </button>
-                </div>
-                <span className="text-red-500">{errors.password?.message}</span>
-              </div>
-              <button
-                type="submit"
-                className="p-4 outline-none text-white bg-purple-500 rounded-xl"
-              >
-                Login
-              </button>
-              <button
-                type="submit"
-                className="p-4 outline-none text-purple-700 border border-purple-700 rounded-xl"
-              >
-                Login As Guest User
-              </button>
-            </form>
-          ) : (
-            //signup form
-            <form
-              onSubmit={handleSubmit(handleSignUp)}
-              className="flex flex-col gap-4"
-              noValidate
-            >
-              <label className="text-zinc-500 text-xl" htmlFor="email">
-                Email
-              </label>
-              <div className="flex flex-col">
-                <input
-                  className=" p-4 rounded-xl outline-none text-zinc-600"
+                  className="p-2 md:p-4 rounded-xl outline-none text-zinc-600"
                   type="email"
                   {...register("email", {
                     required: { value: true, message: "Please enter email" },
@@ -188,14 +246,14 @@ const HomePage = () => {
                 <span className="text-red-500">{errors.email?.message}</span>
               </div>
 
-              <label className="text-zinc-500 text-xl" htmlFor="password">
+              <label className="text-zinc-500 md:text-xl" htmlFor="password">
                 Password
               </label>
               <div className="flex flex-col">
-                <div className="flex justify-between p-4 bg-white rounded-xl">
+                <div className="flex justify-between p-2 md:p-4 bg-white rounded-xl">
                   <input
-                    className="flex-1  outline-none text-zinc-600"
-                    type={signUp_pass ? "text" : "password"}
+                    className="flex-1 w-16 outline-none text-zinc-600"
+                    type={loginPassVisible ? "text" : "password"}
                     {...register("password", {
                       required: {
                         value: true,
@@ -207,12 +265,99 @@ const HomePage = () => {
                   <button
                     type="button"
                     className="outline-none"
-                    onClick={handleSignUp_pass}
+                    onClick={handleLoginPassVisible}
                   >
-                    {signUp_pass ? (
-                      <i className="ri-eye-off-line text-purple-500" />
-                    ) : (
+                    {loginPassVisible ? (
                       <i className="ri-eye-line text-purple-500" />
+                    ) : (
+                      <i className="ri-eye-off-line text-purple-500" />
+                    )}
+                  </button>
+                </div>
+                <span className="text-red-500">{errors.password?.message}</span>
+              </div>
+              <button
+                type="submit"
+                className="p-2 md:p-4 outline-none text-white bg-purple-500 rounded-xl"
+              >
+                {loading ? "Loading..." : "Login"}
+              </button>
+              <button
+                type="button"
+                onClick={handleGuestLogin}
+                className="p-2 md:p-4 outline-none text-purple-700 border border-purple-700 rounded-xl"
+              >
+                Login As Guest User
+              </button>
+            </form>
+          ) : (
+            <form
+              onSubmit={handleSubmit(handleSignUp)}
+              className="flex flex-col gap-3"
+              noValidate
+            >
+              <label className="text-zinc-500 md:text-xl" htmlFor="name">
+                Name
+              </label>
+              <div className="flex flex-col">
+                <input
+                  className="p-2 md:p-4 rounded-xl outline-none text-zinc-600"
+                  type="text"
+                  {...register("name", {
+                    required: { value: true, message: "Please enter name" },
+                  })}
+                  placeholder="john doe"
+                />
+                <span className="text-red-500">{errors.name?.message}</span>
+              </div>
+
+              <label className="text-zinc-500 md:text-xl" htmlFor="email">
+                Email
+              </label>
+              <div className="flex flex-col">
+                <input
+                  className="p-2 md:p-4 rounded-xl outline-none text-zinc-600"
+                  type="email"
+                  {...register("email", {
+                    required: { value: true, message: "Please enter email" },
+                    pattern: {
+                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                      message: "Invalid email address",
+                    },
+                  })}
+                  placeholder="Emailid@gmail.com"
+                />
+                <span className="text-red-500">{errors.email?.message}</span>
+              </div>
+
+              <label
+                className="text-zinc-500 w-16 md:text-xl"
+                htmlFor="password"
+              >
+                Password
+              </label>
+              <div className="flex flex-col">
+                <div className="flex justify-between p-2 md:p-4 bg-white rounded-xl">
+                  <input
+                    className="flex-1 w-16 outline-none text-zinc-600"
+                    type={signUpPassVisible ? "text" : "password"}
+                    {...register("password", {
+                      required: {
+                        value: true,
+                        message: "Please enter your password",
+                      },
+                    })}
+                    placeholder="Password"
+                  />
+                  <button
+                    type="button"
+                    className="outline-none"
+                    onClick={handleSignUpPassVisible}
+                  >
+                    {signUpPassVisible ? (
+                      <i className="ri-eye-line text-purple-500" />
+                    ) : (
+                      <i className="ri-eye-off-line text-purple-500" />
                     )}
                   </button>
                 </div>
@@ -220,39 +365,35 @@ const HomePage = () => {
               </div>
 
               <label
-                className="text-zinc-500 text-xl"
+                className="text-zinc-500 md:text-xl"
                 htmlFor="confirm_password"
               >
                 Confirm Password
               </label>
               <div className="flex flex-col">
-                <div className="flex justify-between p-4 bg-white rounded-xl">
+                <div className="flex justify-between p-2 md:p-4 bg-white rounded-xl">
                   <input
-                    className="flex-1  outline-none text-zinc-600"
-                    type={signUp_c_pass ? "text" : "password"}
+                    className="flex-1 w-16 outline-none text-zinc-600"
+                    type={signUpConfirmPassVisible ? "text" : "password"}
                     {...register("confirm_password", {
                       required: {
                         value: true,
                         message: "Please enter your confirm password",
                       },
-                      validate: (fieldValue) => {
-                        return (
-                          fieldValue === password || "Passwords do not match"
-                        );
-                      },
+                      validate: (fieldValue) =>
+                        fieldValue === password || "Passwords do not match",
                     })}
                     placeholder="Confirm password"
                   />
-
                   <button
                     type="button"
                     className="outline-none"
-                    onClick={handleSignUp_c_pass}
+                    onClick={handleSignUpConfirmPassVisible}
                   >
-                    {signUp_c_pass ? (
-                      <i className="ri-eye-off-line text-purple-500" />
-                    ) : (
+                    {signUpConfirmPassVisible ? (
                       <i className="ri-eye-line text-purple-500" />
+                    ) : (
+                      <i className="ri-eye-off-line text-purple-500" />
                     )}
                   </button>
                 </div>
@@ -261,17 +402,23 @@ const HomePage = () => {
                 </span>
               </div>
 
-              <input
+              {/* <input
                 className="p-2 border border-gray-300 bg-white rounded-xl outline-none w-full cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100 file:cursor-pointer"
                 type="file"
-                {...register("profileImage")}
+                {...register("profileImage", { required: false })}
+              /> */}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="p-2 border border-gray-300 bg-white rounded-xl outline-none w-full cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100 file:cursor-pointer"
               />
 
               <button
                 type="submit"
-                className="p-4 outline-none text-white bg-purple-500 rounded-xl"
+                className="p-2 md:p-4 outline-none text-white bg-purple-500 rounded-xl"
               >
-                Sign Up
+                {loading ? "Loading..." : "Sign Up"}
               </button>
             </form>
           )}
