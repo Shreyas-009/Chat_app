@@ -6,7 +6,7 @@ import "remixicon/fonts/remixicon.css";
 import { toast } from "react-hot-toast";
 
 const HomePage = () => {
-  const [flag, setFlag] = useState(true);
+  const [flag, setFlag] = useState(false);
   const [loginPassVisible, setLoginPassVisible] = useState(false);
   const [signUpPassVisible, setSignUpPassVisible] = useState(false);
   const [signUpConfirmPassVisible, setSignUpConfirmPassVisible] =
@@ -112,7 +112,7 @@ const HomePage = () => {
       };
 
       const userRes = await axios.post(
-        "http://localhost:8080/api/user/register",
+        "http://localhost:8080/api/user/",
         {
           name: name,
           email: email,
@@ -137,7 +137,6 @@ const HomePage = () => {
     }
   };
 
-  
   const handleSignUp = async (data) => {
     reset();
     setLoading(true);
@@ -189,8 +188,8 @@ const HomePage = () => {
   };
 
   return (
-    <div className="flex justify-center items-center w-full min-h-screen bg-zinc-800 py-5 md:py-0">
-      <div className="Form_container flex flex-col md:flex-row overflow-hidden w-5/6 sm:w-3/5 md:w-5/6 lg:w-3/5 bg-white rounded-2xl h-[80%]">
+    <div className="flex justify-center sm:items-center w-full min-h-screen bg-zinc-800 p-5 md:py-0">
+      <div className="Form_container flex flex-col md:flex-row overflow-hidden w-6/6 sm:w-3/5 md:w-5/6 lg:w-3/5 bg-white rounded-2xl h-[80%]">
         <div className="left_container md:w-1/2 bg-purple-500">
           <img
             className="h-full object-contain"
@@ -199,7 +198,7 @@ const HomePage = () => {
           />
         </div>
 
-        <div className="right-page flex flex-col gap-5 md:w-1/2 bg-zinc-100 p-6 md:p-7">
+        <div className="right-page flex flex-col justify-center gap-5 md:w-1/2 bg-zinc-100 p-6 md:p-7">
           <div className="option text-sm md:text-base flex gap-5 p-1">
             <button
               type="button"
@@ -232,6 +231,8 @@ const HomePage = () => {
               </label>
               <div className="flex flex-col">
                 <input
+                  autoComplete="true"
+                  id="email"
                   className="p-2 md:p-4 rounded-xl outline-none text-zinc-600"
                   type="email"
                   {...register("email", {
@@ -252,6 +253,7 @@ const HomePage = () => {
               <div className="flex flex-col">
                 <div className="flex justify-between p-2 md:p-4 bg-white rounded-xl">
                   <input
+                    id="password"
                     className="flex-1 w-16 outline-none text-zinc-600"
                     type={loginPassVisible ? "text" : "password"}
                     {...register("password", {
@@ -301,6 +303,8 @@ const HomePage = () => {
               </label>
               <div className="flex flex-col">
                 <input
+                  id="name"
+                  autoComplete="true"
                   className="p-2 md:p-4 rounded-xl outline-none text-zinc-600"
                   type="text"
                   {...register("name", {
@@ -316,6 +320,8 @@ const HomePage = () => {
               </label>
               <div className="flex flex-col">
                 <input
+                  autoComplete="true"
+                  id="email"
                   className="p-2 md:p-4 rounded-xl outline-none text-zinc-600"
                   type="email"
                   {...register("email", {
@@ -339,6 +345,7 @@ const HomePage = () => {
               <div className="flex flex-col">
                 <div className="flex justify-between p-2 md:p-4 bg-white rounded-xl">
                   <input
+                    id="password"
                     className="flex-1 w-16 outline-none text-zinc-600"
                     type={signUpPassVisible ? "text" : "password"}
                     {...register("password", {
@@ -373,6 +380,7 @@ const HomePage = () => {
               <div className="flex flex-col">
                 <div className="flex justify-between p-2 md:p-4 bg-white rounded-xl">
                   <input
+                    id="confirm_password"
                     className="flex-1 w-16 outline-none text-zinc-600"
                     type={signUpConfirmPassVisible ? "text" : "password"}
                     {...register("confirm_password", {
