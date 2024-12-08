@@ -1,39 +1,32 @@
-import React, { useEffect, useState } from 'react'
-import axios from 'axios';
+import React, { useState } from "react";
+import SideBar from "../Components/Miscellaneous/SideBar";
+import MyChats from "../Components/MyChats";
+import ChatBox from "../Components/ChatBox";
+import { ChatState } from "../Context/ChatProvider";
+import ProfileModel from "../Components/Miscellaneous/ProfileModel";
 
 const ChatPage = () => {
-  const [chats , setChats] = useState([]); 
-  const [userinfo , setUserinfo] = useState([]);
-
-  const FetchData = async () => {
-    const data = await axios.get("/api/chat");
-    setChats(data.data);
-  };
-
-
-  useEffect(() => {
-    const user = localStorage.getItem("userInfo");
-    setUserinfo(user);
-    // console.log("userinfo : ", user);
-    FetchData();
-  }, []);
+  const { user } = ChatState();
+  const [openProfile, setOpenProfile] = useState(false);
 
   return (
-    <>
-      <div>ChatPage</div>
-      {/* {chats.map((value, index, array) => {
-        return (
-          <div key={index}>
-            {value.chatName} : {value._id}
-          </div>
-        );
-      })} */}
-      <h1>{userinfo.name}</h1>
-      <h1>{userinfo.email}</h1>
-      <h1>{userinfo.token}</h1>
-      <img className="" src={userinfo.picture} alt="" />
-    </>
+    <div className="w-full h-full bg-zinc-900 flex flex-col">
+      {user && (
+        <SideBar openProfile={openProfile} setOpenProfile={setOpenProfile} />
+      )}
+      <div className="flex-1 flex  justify-center w-full  bg-zinc-700 p-2">
+        {user && <MyChats />}
+        {user && <ChatBox />}
+        {openProfile && (
+          <ProfileModel
+            user={user}
+            openProfile={openProfile}
+            setOpenProfile={setOpenProfile}
+          />
+        )}
+      </div>
+    </div>
   );
-}
+};
 
 export default ChatPage;

@@ -6,7 +6,7 @@ const App = () => {
   return (
     <>
       <Toaster position="top-center" toastOptions={{ duration: 3000 }} />
-      <div className="w-full min-h-screen bg-zinc-900 text-white">
+      <div className="w-full h-screen bg-zinc-900 text-white">
         {/* <NavBar /> */}
         <Routing />
       </div>

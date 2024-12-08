@@ -52,18 +52,17 @@ const authUser = asyncHandler(async (req, res) => {
 
   const user = await User.findOne({ email});
 
-  if (user && user.matchPassword(password)) {
-    res.json({
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        picture: user.picture,
-        token: generateToken(user._id),
-      });
-  }
-  else {
-    res.status(401).json({ error: "Invalid email or password" });
-  }
+if (user && (await user.matchPassword(password))) {
+  res.json({
+    _id: user._id,
+    name: user.name,
+    email: user.email,
+    picture: user.picture,
+    token: generateToken(user._id),
+  });
+} else {
+  res.status(401).json({ error: "Invalid email or password" });
+}
 });
 
 const allUsers = asyncHandler(async (req,res)=>{
@@ -73,7 +72,7 @@ const allUsers = asyncHandler(async (req,res)=>{
       {email: {$regex: req.query.search, $options: 'i'}},
     ]
   } : {};
-  const users = await User.find(keyword).find({_id:{$ne : req.user._id}});
+  const users = await User.find(keyword).select('-password').find({_id:{$ne : req.user._id}});
   res.json(users);
 })
 
