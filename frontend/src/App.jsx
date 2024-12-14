@@ -1,8 +1,10 @@
+import { useEffect } from "react";
 import NavBar from "./pages/NavBar";
 import Routing from "./Routing";
 import toast, { Toaster } from "react-hot-toast";
 
 const App = () => {
+
   return (
     <>
       <Toaster position="top-center" toastOptions={{ duration: 3000 }} />

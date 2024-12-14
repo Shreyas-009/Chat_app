@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { ChatState } from "../../Context/ChatProvider";
 import axios from "axios";
 
-const groupChatModel = ({ setIsGropuchatOpen }) => {
+const GroupSettingModel = ({ setIsGropuchatOpen ,reload , setReload }) => {
   const [groupName, setGroupName] = useState("");
   const [usersToAdd, setUsersToAdd] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -91,16 +91,21 @@ const groupChatModel = ({ setIsGropuchatOpen }) => {
         </button>
         <div className="flex flex-col items-center gap-5 w-full">
           <h1 className="text-3xl font-semibold text-purple-400">
-            Create Group Chat
+            Group Setting
           </h1>
 
           <div className="flex flex-col gap-3 w-full">
-            <input
-              className="p-3 rounded-md border-[1px] border-zinc-600 bg-zinc-700 text-white placeholder-zinc-400"
-              type="text"
-              placeholder="Chat Name"
-              onChange={(e) => setGroupName(e.target.value)}
-            />
+            <div className="flex gap-3 w-full">
+              <input
+                className="p-3 rounded-md border-[1px] border-zinc-600 bg-zinc-700 text-white placeholder-zinc-400 flex-1 gap-1"
+                type="text"
+                placeholder="Update Group Name"
+                onChange={(e) => setGroupName(e.target.value)}
+              />
+              <button className="bg-green-600 text-white rounded-md px-3 py-1 hover:bg-green-700">
+                Update
+              </button>
+            </div>
             <input
               className="p-3 rounded-md border-[1px] border-zinc-600 bg-zinc-700 text-white placeholder-zinc-400"
               type="text"
@@ -159,10 +164,10 @@ const groupChatModel = ({ setIsGropuchatOpen }) => {
             </div>
           )}
           <button
-            className="w-fit py-2 px-4 text-white rounded-md self-end bg-purple-500 hover:bg-purple-700"
+            className="w-fit py-2 px-4 text-white rounded-md self-end bg-red-600 hover:bg-red-700"
             onClick={handleSubmit}
           >
-            Create Group
+            Leave Group
           </button>
         </div>
       </div>
@@ -170,4 +175,4 @@ const groupChatModel = ({ setIsGropuchatOpen }) => {
   );
 };
 
-export default groupChatModel;
+export default GroupSettingModel;

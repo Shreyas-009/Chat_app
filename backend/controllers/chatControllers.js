@@ -16,7 +16,7 @@ const accessChat = asyncHandler(async (req, res) => {
     ],
   })
     .populate("users", "-password")
-    .populate("latestMessages", "-password");
+    .populate("latestMessages");
 
   isChat = await User.populate(isChat, {
     path: "latestMessage.sender",
@@ -24,7 +24,7 @@ const accessChat = asyncHandler(async (req, res) => {
   });
 
   if (isChat.length > 0) {
-    res.json(isChat[0]);
+    res.send(isChat[0]);
   } else {
     var chatData = {
       chatName: "sender",
