@@ -5,10 +5,6 @@ const ProfileModel = ({ user, openProfile, setOpenProfile }) => {
     return <div>Loading...</div>;
   }
 
-  if (!openProfile) {
-    return null;
-  }
-
   return (
     <div
       className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center"

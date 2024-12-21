@@ -2,14 +2,16 @@ import React, { useState } from "react";
 import { ChatState } from "../../Context/ChatProvider";
 import axios from "axios";
 
-const GroupSettingModel = ({ setIsGropuchatOpen ,reload , setReload }) => {
+const GroupSettingModel = ({ setIsGropuchatOpen, reload, setReload }) => {
   const [groupName, setGroupName] = useState("");
   const [usersToAdd, setUsersToAdd] = useState([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState([]);
   const [searchResult, setSearchResult] = useState([]);
 
-  const { user, chats, setChats } = ChatState();
+  const { user, chats, setChats, SelectedChat, setSelectedChat } = ChatState();
+
+  console.log(SelectedChat);
 
   const handleSearch = async (searchTerm) => {
     setSearch(searchTerm);
@@ -29,14 +31,6 @@ const GroupSettingModel = ({ setIsGropuchatOpen ,reload , setReload }) => {
     } catch (error) {
       console.log(error.message);
     }
-  };
-
-  const handleAddUser = (user) => {
-    if (usersToAdd.includes(user)) {
-      return;
-    }
-    setUsersToAdd([...usersToAdd, user]);
-    setSearch("");
   };
 
   const handleSubmit = async () => {
@@ -67,9 +61,124 @@ const GroupSettingModel = ({ setIsGropuchatOpen ,reload , setReload }) => {
       setChats([data, ...chats]); // Update the chat list with the new group
       setIsGropuchatOpen(false); // Close the modal
       setLoading(false);
+      setReload(reload); // Reload the)
     } catch (error) {
       console.error("Error creating group chat:", error.message);
       alert("Failed to create the group chat. Please try again.");
+      setLoading(false);
+    }
+  };
+
+  const handlRenameGroupChat = async () => {
+    if (!groupName) return;
+
+    console.log(SelectedChat._id);
+    console.log(groupName);
+
+    try {
+      setLoading(true);
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+      };
+
+      await axios.put(
+        `http://localhost:8080/api/chat/rename`,
+        {
+          chatId: SelectedChat._id,
+          chatName: groupName,
+        },
+        config
+      );
+
+      setReload(reload); // Reload the)
+      setIsGropuchatOpen(false); // Close the modal
+      setLoading(false);
+      // alert("group renamed");
+    } catch (error) {
+      console.error("Error renaming group chat:", error.message);
+      alert("Failed to rename the group chat. Please try again.");
+      setLoading(false);
+    }
+  };
+
+  const handleLeaveGroupChat = () => {};
+
+  const handleAddUser = async (user1) => {
+    if (SelectedChat.users.find((u) => u._id === user1._id)) {
+      alert("User is already in the group");
+      return;
+    }
+    if (SelectedChat.groupAdmin._id !== user._id) {
+      alert("Only Admin can add users");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+      };
+
+      const { data } = await axios.put(
+        `http://localhost:8080/api/chat/groupadd`,
+        {
+          chatId: SelectedChat._id,
+          userId: user1._id,
+        },
+        config
+      );
+      setSelectedChat(data);
+      setReload(reload);
+      setLoading(false);
+      alert("user has been added");
+    } catch (error) {
+      console.error("Error adding user to group chat:", error.message);
+      alert("Failed to add user to the group chat. Please try again.");
+      setLoading(false);
+    }
+  };
+
+  const handleRemoveUser = async (user1) => {
+    if (SelectedChat.groupAdmin._id !== user._id && user1._id !== user._id) {
+      alert("Only Admin can remove users");
+      return;
+    }
+    // if (user1._id === user._id) {
+    //   alert("You cannot remove yourself from the group");
+    //   return;
+    // }
+    try {
+      setLoading(true);
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+      };
+      const { data } = await axios.put(
+        `http://localhost:8080/api/chat/groupremove`,
+        {
+          chatId: SelectedChat._id,
+          userId: user1._id,
+        },
+        config
+      );
+
+      user1._id === user._id ? setSelectedChat() : setSelectedChat(data);
+      setReload(reload);
+      setLoading(false);
+
+      alert("user removed");
+    } catch (error) {
+      console.error("Error removing user from group chat:", error.message);
+      alert("Failed to remove user from the group chat. Please try again.");
       setLoading(false);
     }
   };
@@ -94,6 +203,29 @@ const GroupSettingModel = ({ setIsGropuchatOpen ,reload , setReload }) => {
             Group Setting
           </h1>
 
+          {SelectedChat.users.length > 0 && (
+            <div className="flex gap-3 w-full overflow-x-scroll hideScrollbar">
+              {SelectedChat.users.map((user) => {
+                return (
+                  <div
+                    className="flex gap-2 bg-zinc-700 p-2 items-center rounded-md"
+                    key={user.id}
+                  >
+                    <h3 className="text-sm text-white font-semibold whitespace-nowrap">
+                      {user.name}
+                    </h3>
+                    <button
+                      onClick={() => handleRemoveUser(user)}
+                      className="text-sm px-1 rounded-md bg-purple-500 hover:bg-purple-700 text-white"
+                    >
+                      <i className="ri-close-line"></i>
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
           <div className="flex flex-col gap-3 w-full">
             <div className="flex gap-3 w-full">
               <input
@@ -102,7 +234,10 @@ const GroupSettingModel = ({ setIsGropuchatOpen ,reload , setReload }) => {
                 placeholder="Update Group Name"
                 onChange={(e) => setGroupName(e.target.value)}
               />
-              <button className="bg-green-600 text-white rounded-md px-3 py-1 hover:bg-green-700">
+              <button
+                className="bg-green-600 text-white rounded-md px-3 py-1 hover:bg-green-700"
+                onClick={() => handlRenameGroupChat()}
+              >
                 Update
               </button>
             </div>
@@ -165,7 +300,7 @@ const GroupSettingModel = ({ setIsGropuchatOpen ,reload , setReload }) => {
           )}
           <button
             className="w-fit py-2 px-4 text-white rounded-md self-end bg-red-600 hover:bg-red-700"
-            onClick={handleSubmit}
+            onClick={() => handleRemoveUser(user)}
           >
             Leave Group
           </button>

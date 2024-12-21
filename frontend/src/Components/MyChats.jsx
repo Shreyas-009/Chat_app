@@ -9,9 +9,6 @@ const MyChats = ({ reload }) => {
   const { user, SelectedChat, setSelectedChat, chats, setChats } = ChatState();
   const [isGropuchatOpen, setIsGropuchatOpen] = useState(false);
 
-  // console.log(SelectedChat);
-  console.log(chats);
-
   const fetchChat = async () => {
     try {
       const config = {
@@ -30,7 +27,11 @@ const MyChats = ({ reload }) => {
   }, [reload]);
 
   return (
-    <div className="w-full md:w-1/3 bg-zinc-600 rounded-xl overflow-hidden ">
+    <div
+      className={`${
+        SelectedChat ? "hidden md:block" : "w-full"
+      }  md:w-1/3 bg-zinc-600 rounded-xl overflow-hidden `}
+    >
       <div className="bg-zinc-800 w-full flex justify-between items-center p-2">
         <h1 className="text-3xl">Chats</h1>
         <button
@@ -82,7 +83,7 @@ const MyChats = ({ reload }) => {
                   <h2 className="text-sm text-white font-semibold">
                     {chat.users[1].name}
                   </h2>
-                  <span>Status: Online</span>
+                  <span>Email : {chat.users[1].email}</span>
                 </div>
               </div>
             )

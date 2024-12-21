@@ -2,24 +2,49 @@ import React, { useState } from "react";
 import { ChatState } from "../../Context/ChatProvider";
 import { getSender, getSenderFull } from "../Config/ChatLogics";
 import ProfileModel from "./ProfileModel";
+import GroupSettingModel from "./GroupSettingModel";
 
-const SingleChat = () => {
+const SingleChat = ({ reload, setReload }) => {
   const [groupSetting, setGroupSetting] = useState(false);
-  const [openProfile, closeProfile] = useState(
-  const {user , SelectedChat } = ChatState();
-  console.log(SelectedChat);
+  const [openProfile, setOpenProfile] = useState();
+  const { user, SelectedChat, setSelectedChat } = ChatState();
 
   return (
     <>
       {SelectedChat ? (
         <>
           <div className="bg-zinc-800 w-full h-fit justify-between flex p-2 rounded-xl items-center text-center">
-            <h1 className="text-3xl font-semibold">
-              {getSender(user, SelectedChat.users)}
-            </h1>
-            <ProfileModel user={getSenderFull(user, SelectedChat.users)} />
+            <div className="flex gap-2 justify-center items-center">
+              <button className="block md:hidden" onClick={() => setSelectedChat(null)}>
+                <i className="ri-arrow-left-line text-2xl"></i>
+              </button>
+              {!SelectedChat.isGroupChat ? (
+                <img
+                  src={
+                    SelectedChat.users[1].picture
+                      ? SelectedChat.users[1].picture
+                      : "default_profile_picture.png"
+                  }
+                  alt={user.name}
+                  className="h-8 w-8 rounded-full object-cover"
+                />
+              ) : (
+                <div className="rounded-full h-9 w-9 bg-purple-500 flex items-center justify-center text-white font-bold text-lg">
+                  {SelectedChat.chatName[0].toUpperCase()}
+                </div>
+              )}
+              <span className="text-2xl font-semibold">
+                {SelectedChat.isGroupChat
+                  ? SelectedChat.chatName
+                  : getSender(user, SelectedChat.users)}
+              </span>
+            </div>
             <button
-              onClick={() => setGroupSetting(true)}
+              onClick={() =>
+                SelectedChat.isGroupChat
+                  ? setGroupSetting(true)
+                  : setOpenProfile(true)
+              }
               className="text-2xl text-white hover:text-purple-500 hover:bg-zinc-300 p-1 px-2 rounded-xl transition-colors "
             >
               <i className="ri-settings-3-line"></i>
@@ -29,6 +54,12 @@ const SingleChat = () => {
                 setIsGropuchatOpen={setGroupSetting}
                 reload={reload}
                 setReload={setReload}
+              />
+            )}
+            {openProfile && (
+              <ProfileModel
+                user={getSenderFull(user, SelectedChat.users)}
+                setOpenProfile={setOpenProfile}
               />
             )}
           </div>

@@ -1,12 +1,17 @@
 import React, { useState } from "react";
-import GroupSettingModel from "./Miscellaneous/GroupSettingModel";
 import SingleChat from "./Miscellaneous/SingleChat";
+import { ChatState } from "../Context/ChatProvider";
+
 const ChatBox = ({ reload, setReload }) => {
-  const [groupSetting, setGroupSetting] = useState(false);
+  const { SelectedChat } = ChatState();
 
   return (
-    <div className="hidden md:flex flex-1 bg-zinc-600 rounded-xl overflow-hidden flex-col p-2 gap-2">
-      <SingleChat />
+    <div
+      className={`${
+        SelectedChat ? "flex" : "hidden"
+      } md:flex flex-1 bg-zinc-600 rounded-xl overflow-hidden flex-col p-2 gap-2`}
+    >
+      <SingleChat setReload={setReload} reload={reload} />
     </div>
   );
 };
