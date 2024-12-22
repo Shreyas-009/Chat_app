@@ -50,7 +50,7 @@ const SideBar = ({ openProfile, setOpenProfile }) => {
 
       const { data } = await axios.post(`/api/chat`, { userId }, config);
       // console.log(data);
-      
+
       setSelectedChat(data);
       setLoadingChat(false);
       setIsOpen(false);
@@ -62,11 +62,11 @@ const SideBar = ({ openProfile, setOpenProfile }) => {
   return (
     <>
       <div className="flex justify-between w-full bg-zinc-800 p-2 relative ">
-        <div className="flex px-3 py-2 bg-zinc-800 hover:bg-zinc-200 hover:text-black rounded-md transition duration-300 ease-in-out ">
-          <i
-            className="ri-search-2-line"
-            onClick={() => setOpenSearch(!OpenSearch)}
-          ></i>
+        <div
+          onClick={() => setOpenSearch(!OpenSearch)}
+          className="flex px-3 py-2 bg-zinc-800 hover:bg-zinc-200 hover:text-black rounded-md transition duration-300 ease-in-out "
+        >
+          <i className="ri-search-2-line"></i>
           <input
             className="bg-inherit px-3 outline-none hidden md:flex"
             type="text"
@@ -205,7 +205,9 @@ const SideBar = ({ openProfile, setOpenProfile }) => {
               className="flex items-center focus:outline-none z-10"
             >
               <img
-                src={user.picture ? user.picture : 'default_profile_picture.png'}
+                src={
+                  user.picture ? user.picture : "default_profile_picture.png"
+                }
                 alt={user.name}
                 className="h-8 w-8 rounded-full object-cover"
               />

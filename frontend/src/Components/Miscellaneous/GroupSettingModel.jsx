@@ -2,7 +2,12 @@ import React, { useState } from "react";
 import { ChatState } from "../../Context/ChatProvider";
 import axios from "axios";
 
-const GroupSettingModel = ({ setIsGropuchatOpen, reload, setReload }) => {
+const GroupSettingModel = ({
+  setIsGropuchatOpen,
+  reload,
+  setReload,
+  fetchMessage,
+}) => {
   const [groupName, setGroupName] = useState("");
   const [usersToAdd, setUsersToAdd] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -154,6 +159,7 @@ const GroupSettingModel = ({ setIsGropuchatOpen, reload, setReload }) => {
     //   alert("You cannot remove yourself from the group");
     //   return;
     // }
+
     try {
       setLoading(true);
       const config = {
@@ -173,6 +179,7 @@ const GroupSettingModel = ({ setIsGropuchatOpen, reload, setReload }) => {
 
       user1._id === user._id ? setSelectedChat() : setSelectedChat(data);
       setReload(reload);
+      fetchMessage();
       setLoading(false);
 
       alert("user removed");

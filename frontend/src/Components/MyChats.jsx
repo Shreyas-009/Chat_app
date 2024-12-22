@@ -9,6 +9,8 @@ const MyChats = ({ reload }) => {
   const { user, SelectedChat, setSelectedChat, chats, setChats } = ChatState();
   const [isGropuchatOpen, setIsGropuchatOpen] = useState(false);
 
+  console.log(user);
+
   const fetchChat = async () => {
     try {
       const config = {
@@ -30,12 +32,12 @@ const MyChats = ({ reload }) => {
     <div
       className={`${
         SelectedChat ? "hidden md:block" : "w-full"
-      }  md:w-1/3 bg-zinc-600 rounded-xl overflow-hidden `}
+      }  md:w-1/3 bg-zinc-800 rounded-xl overflow-hidden`}
     >
-      <div className="bg-zinc-800 w-full flex justify-between items-center p-2">
-        <h1 className="text-3xl">Chats</h1>
+      <div className="bg-zinc-900 w-full flex justify-between items-center p-3">
+        <h1 className="text-3xl text-white font-semibold">Chats</h1>
         <button
-          className="p-2  rounded-lg text-zinc-100 bg-purple-600 hover:bg-purple-700 text-center font-semibold text-md"
+          className="p-2 rounded-lg text-white bg-purple-600 hover:bg-purple-700 text-center font-semibold text-md transition-colors duration-200 flex items-center gap-2"
           onClick={() => setIsGropuchatOpen(!isGropuchatOpen)}
         >
           Create Group
@@ -45,45 +47,58 @@ const MyChats = ({ reload }) => {
           <GroupChatModel setIsGropuchatOpen={setIsGropuchatOpen} />
         )}
       </div>
-      <div className="p-2 flex flex-col gap-2">
+      <div className="p-3 flex flex-col gap-2">
         {chats &&
           chats.map((chat) =>
             chat.isGroupChat ? (
               <div
                 key={chat._id}
-                className={`flex gap-2 hover:bg-purple-400 p-2 rounded-lg items-center ${
-                  SelectedChat === chat ? "bg-purple-600" : "bg-zinc-700"
+                className={`flex gap-3 hover:bg-purple-500/20 p-3 rounded-lg items-center cursor-pointer transition-colors duration-200 ${
+                  SelectedChat === chat ? "bg-purple-600" : "bg-zinc-700/50"
                 }`}
                 onClick={() => setSelectedChat(chat)}
               >
-                <div className="rounded-full h-9 w-9 bg-purple-500 flex items-center justify-center text-white font-bold text-lg">
+                <div className="rounded-full h-9 w-9 bg-purple-500 flex items-center justify-center text-white font-bold text-lg shadow-md">
                   {chat.chatName[0].toUpperCase()}
                 </div>
                 <div className="flex flex-col text-xs">
                   <h2 className="text-sm text-white font-semibold">
                     {chat.chatName}
                   </h2>
-                  <span>{chat.users.length} Members</span>
+                  <span className="text-zinc-300">
+                    {chat.users.length} Members
+                  </span>
                 </div>
               </div>
             ) : (
               <div
                 key={chat._id}
-                className={`flex gap-2 hover:bg-purple-400 p-2 rounded-lg items-center ${
-                  SelectedChat === chat ? "bg-purple-500" : "bg-zinc-700"
+                className={`flex gap-3 hover:bg-purple-500/20 p-3 rounded-lg items-center cursor-pointer transition-colors duration-200 ${
+                  SelectedChat === chat ? "bg-purple-600" : "bg-zinc-700/50"
                 }`}
                 onClick={() => setSelectedChat(chat)}
               >
                 <img
-                  src={chat.users[1].picture}
+                  src={
+                    chat.users[1].name === user.name
+                      ? chat.users[0].picture
+                      : chat.users[1].picture
+                  }
                   alt=""
-                  className="rounded-full h-9 w-9 bg-zinc-900"
+                  className="rounded-full h-9 w-9 bg-zinc-900 object-cover"
                 />
                 <div className="flex flex-col text-xs">
                   <h2 className="text-sm text-white font-semibold">
-                    {chat.users[1].name}
+                    {chat.users[1].name === user.name
+                      ? chat.users[0].name
+                      : chat.users[1].name}
                   </h2>
-                  <span>Email : {chat.users[1].email}</span>
+                  <span className="text-zinc-300">
+                    Email:{" "}
+                    {chat.users[1].name === user.name
+                      ? chat.users[0].email
+                      : chat.users[1].email}
+                  </span>
                 </div>
               </div>
             )

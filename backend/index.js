@@ -7,6 +7,7 @@ const mongoose = require("./config/mongoos");
 const { chats } = require("./data/data");
 const userRoutes = require("./routes/userRoutes");
 const chatRoutes = require("./routes/chatRoutes");
+const messageRoutes = require("./routes/messageRouts");
 const { notFound, errorHandler } = require("./middleware/errormiddleware");
 
 //cores used for giving access to frontend of ower databases
@@ -33,6 +34,8 @@ app.use(express.json());
 app.use("/api/user", userRoutes);
 //
 app.use("/api/chat", chatRoutes);
+
+app.use("/api/message", messageRoutes);
 
 // Middleware for handling 404 Not Found errors
 app.use(notFound);

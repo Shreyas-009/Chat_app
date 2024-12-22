@@ -4,6 +4,7 @@ const app = express();
 const User = require("../models/userModel");
 const generateToken = require("../config/generateToken");
 
+
 //Registering a new user
 const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password, picture } = req.body;

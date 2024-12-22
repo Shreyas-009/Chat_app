@@ -12,7 +12,7 @@ const messageSchema = mongoose.Schema(
       required: true,
     },
     chat: {
-      type: mongoose.Schrma.Type.ObjectId,
+      type: mongoose.SchemaTypes.ObjectId,
       ref: "Chat",
     },
   },
@@ -22,4 +22,5 @@ const messageSchema = mongoose.Schema(
 );
 
 const Message = mongoose.model("Message", messageSchema);
-mongoose.model.exports = Message;
+
+module.exports = Message;

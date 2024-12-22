@@ -9,7 +9,7 @@ const ChatBox = ({ reload, setReload }) => {
     <div
       className={`${
         SelectedChat ? "flex" : "hidden"
-      } md:flex flex-1 bg-zinc-600 rounded-xl overflow-hidden flex-col p-2 gap-2`}
+      } md:flex flex-1 bg-zinc-800 rounded-xl overflow-hidden flex-col p-2 gap-2`}
     >
       <SingleChat setReload={setReload} reload={reload} />
     </div>
