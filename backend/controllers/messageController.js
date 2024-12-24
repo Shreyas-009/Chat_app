@@ -53,4 +53,37 @@ const allMessages = asyncHandler(async (req, res) => {
   }
 });
 
-module.exports = { sendMessage, allMessages };
+//delete messages
+const deleteMessage = asyncHandler(async (req, res) => {
+  try {
+    const message = await Message.findById(req.params.messageId).populate(
+      "chat"
+    ); // Add this to get chat info for socket
+
+    if (!message) {
+      res.status(404);
+      throw new Error("Message not found");
+    }
+
+    // Check if the user trying to delete is the sender
+    if (message.sender.toString() !== req.user._id.toString()) {
+      res.status(403);
+      throw new Error("You can only delete your own messages");
+    }
+
+    const chatId = message.chat._id; // Store chatId before deletion
+    await Message.findByIdAndDelete(req.params.messageId);
+
+    // Send both messageId and chatId in response
+    res.json({
+      message: "Message deleted successfully",
+      messageId: req.params.messageId,
+      chatId: chatId,
+    });
+  } catch (error) {
+    res.status(400);
+    throw new Error(error.message);
+  }
+});
+
+module.exports = { sendMessage, allMessages, deleteMessage };

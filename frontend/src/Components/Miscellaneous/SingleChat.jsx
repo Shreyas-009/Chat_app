@@ -81,10 +81,18 @@ const SingleChat = ({ reload, setReload }) => {
 
   const [socketConnected, setSocketConnected] = useState(false);
 
+  const messagesEndRef = useRef(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
   const fetchMessage = async () => {
-    if (!SelectedChat) {
-      return;
-    }
+    if (!SelectedChat) return;
 
     try {
       const config = {
@@ -94,22 +102,20 @@ const SingleChat = ({ reload, setReload }) => {
       };
 
       setLoading(true);
-
       const { data } = await axios.get(
         `/api/message/${SelectedChat._id}`,
         config
       );
-
       setMessages(data);
-      setLoading(false);
       socket.emit("join chat", SelectedChat._id);
     } catch (error) {
-      console.log(error);
       toast.error("Failed to fetch messages");
+    } finally {
       setLoading(false);
     }
   };
 
+  // socket.io setup useeffect
   useEffect(() => {
     socket = io(ENDPOINT);
     socket.emit("setup", user);
@@ -117,6 +123,39 @@ const SingleChat = ({ reload, setReload }) => {
     socket.on("typing", () => setIsTyping(true));
     socket.on("stop typing", () => setIsTyping(false));
   }, []);
+
+  // message delete and notification handling useeffect
+  useEffect(() => {
+    const messageHandler = (newMessageReceived) => {
+      if (
+        !selectedChatCompare ||
+        selectedChatCompare._id !== newMessageReceived.chat._id
+      ) {
+        if (!notifications.includes(newMessageReceived)) {
+          setNotifications([...notifications, newMessageReceived]);
+          setReload(!reload);
+        }
+      } else {
+        setMessages((prevMessages) => [...prevMessages, newMessageReceived]);
+      }
+    };
+
+    const deleteHandler = ({ messageId, chatId }) => {
+      if (SelectedChat && SelectedChat._id === chatId) {
+        setMessages((prevMessages) =>
+          prevMessages.filter((msg) => msg._id !== messageId)
+        );
+      }
+    };
+
+    socket.on("message recived", messageHandler);
+    socket.on("message deleted", deleteHandler);
+
+    return () => {
+      socket.off("message recived", messageHandler);
+      socket.off("message deleted", deleteHandler);
+    };
+  }, [selectedChatCompare, notifications, SelectedChat]);
 
   const handleSendMessage = async () => {
     socket.emit("stop typing", SelectedChat._id);
@@ -177,6 +216,34 @@ const SingleChat = ({ reload, setReload }) => {
     }, timerLength);
   };
 
+  //delete message handler
+  const handleDeleteMessage = async (messageId) => {
+    try {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      };
+
+      await axios.delete(`/api/message/${messageId}`, config);
+
+      // Update local state immediately for sender
+      setMessages((prevMessages) =>
+        prevMessages.filter((msg) => msg._id !== messageId)
+      );
+
+      // Emit delete event for other users
+      socket.emit("delete message", {
+        messageId: messageId,
+        chatId: SelectedChat._id,
+      });
+
+      toast.success("Message deleted successfully");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to delete message");
+    }
+  };
+
   useEffect(() => {
     fetchMessage();
     selectedChatCompare = SelectedChat;
@@ -198,7 +265,6 @@ const SingleChat = ({ reload, setReload }) => {
       }
     });
   });
-  console.log(notifications);
 
   return (
     <>
@@ -258,72 +324,131 @@ const SingleChat = ({ reload, setReload }) => {
               />
             )}
           </div>
-
-          <div className="flex-1 bg-zinc-800 rounded-xl flex flex-col gap-3 p-3 shadow-inner">
+          <div className="flex-1 bg-zinc-900/50 rounded-xl flex flex-col gap-3 p-3 shadow-inner ">
             {loading ? (
               <div className="flex-1 flex justify-center items-center">
                 <div className="animate-spin rounded-full h-12 w-12 border-4 border-zinc-600 border-t-purple-500"></div>
               </div>
             ) : (
-              <div
-                id="message-container"
-                className="w-full flex-1 overflow-y-auto"
-              >
-                {messages.map((message) => (
-                  <div
-                    key={message._id}
-                    className={`flex ${
-                      message.sender._id === user._id
-                        ? "justify-end"
-                        : "justify-start"
-                    } mb-2`}
-                  >
-                    <div
-                      className={`max-w-[70%] rounded-lg p-3 ${
-                        message.sender._id === user._id
-                          ? "bg-purple-600 text-white"
-                          : "bg-zinc-700 text-zinc-200"
-                      }`}
-                    >
-                      {SelectedChat.isGroupChat &&
-                        message.sender._id !== user._id && (
-                          <div className="text-xs font-bold mb-1 text-purple-300">
-                            {message.sender.name}
+              <div className="flex flex-col h-full">
+                <div
+                  id="message-container"
+                  className="h-[calc(100vh-277px)] overflow-y-auto pr-2 space-y-2 scrollbar-thin scrollbar-thumb-zinc-600 scrollbar-track-zinc-800 hideScrollbar"
+                >
+                  {messages.map((message, index) => {
+                    const isCurrentUser = message.sender._id === user._id;
+                    const isPreviousMessageFromSameSender =
+                      index > 0 &&
+                      messages[index - 1].sender._id === message.sender._id;
+                    const isNextMessageFromSameSender =
+                      index < messages.length - 1 &&
+                      messages[index + 1].sender._id === message.sender._id;
+                    const showAvatar =
+                      !isCurrentUser && !isNextMessageFromSameSender;
+
+                    return (
+                      <div
+                        key={message._id}
+                        className={`flex ${
+                          isCurrentUser ? "justify-end" : "justify-start"
+                        } ${isPreviousMessageFromSameSender ? "mt-1" : "mt-3"}`}
+                      >
+                        {!isCurrentUser && (
+                          <div className="flex items-end">
+                            {showAvatar && SelectedChat.isGroupChat ? (
+                              <img
+                                src={message.sender.picture}
+                                alt={message.sender.name}
+                                className="w-6 h-6 rounded-full mr-2 mb-1 object-cover"
+                              />
+                            ) : (
+                              SelectedChat.isGroupChat && (
+                                <div className="w-6 mr-2" />
+                              )
+                            )}
+                            <div
+                              className={`max-w-[70%] min-w-[120px] rounded-lg px-3 py-1.5 bg-zinc-700 text-zinc-200`}
+                            >
+                              {SelectedChat.isGroupChat &&
+                                !isPreviousMessageFromSameSender && (
+                                  <div className="text-xs font-bold mb-0.5 text-purple-300">
+                                    {message.sender.name}
+                                  </div>
+                                )}
+                              <div className="break-words text-sm whitespace-pre-wrap">
+                                {message.content}
+                              </div>
+                              <div className="text-[10px] text-nowrap mt-0.5 text-zinc-400">
+                                {new Date(message.createdAt).toLocaleTimeString(
+                                  [],
+                                  {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  }
+                                )}
+                              </div>
+                            </div>
                           </div>
                         )}
-                      <div>{message.content}</div>
-                      <div className="text-xs mt-1 text-zinc-400">
-                        {new Date(message.createdAt).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
+
+                        {isCurrentUser && (
+                          <div className="relative group max-w-[70%] min-w-[120px]">
+                            <div className="rounded-lg px-3 py-1.5 bg-purple-600 text-white">
+                              <div className="break-words text-sm whitespace-pre-wrap">
+                                {message.content}
+                              </div>
+                              <div className="flex items-center justify-between gap-2 mt-0.5">
+                                <div className="text-[10px] text-zinc-300">
+                                  {new Date(
+                                    message.createdAt
+                                  ).toLocaleTimeString([], {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  })}
+                                </div>
+                                <button
+                                  onClick={() =>
+                                    handleDeleteMessage(message._id)
+                                  }
+                                  className="text-zinc-300  hover:text-red-400 transition-colors md:opacity-0 md:group-hover:opacity-100"
+                                >
+                                  <i className="ri-delete-bin-line"></i>
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    </div>
+                    );
+                  })}
+
+                  <div ref={messagesEndRef} />
+                </div>
+                <div className="w-full">
+                  <div style={{ visibility: isTyping ? "visible" : "hidden" }}>
+                    <TypingIndicator />
                   </div>
-                ))}
+
+                  <div className="w-full flex gap-3 pt-2">
+                    <input
+                      className="p-3 bg-zinc-900 text-white placeholder-zinc-400 rounded-xl w-full border-2 border-zinc-700 outline-none focus:border-purple-500 transition-colors"
+                      type="text"
+                      placeholder="Type a message..."
+                      onKeyDown={handleKeyPress}
+                      onChange={typingHandler}
+                      value={newMessage}
+                      required
+                    />
+                    <button
+                      onClick={handleSendMessage}
+                      className="px-4 bg-purple-600 hover:bg-purple-700 rounded-xl transition-colors duration-200 flex items-center justify-center"
+                    >
+                      <i className="ri-send-plane-2-fill text-white text-xl"></i>
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
-
-            <div className="w-full flex flex-col gap-3">
-              {isTyping ? <TypingIndicator /> : <></>}
-              <div className="w-full flex gap-3">
-                <input
-                  className="p-3 bg-zinc-900 text-white placeholder-zinc-400 rounded-xl w-full border-2 border-zinc-700 outline-none focus:border-purple-500 transition-colors"
-                  type="text"
-                  placeholder="Type a message..."
-                  onKeyDown={handleKeyPress}
-                  onChange={typingHandler}
-                  value={newMessage}
-                  required
-                />
-                <button
-                  onClick={handleSendMessage}
-                  className="px-4 bg-purple-600 hover:bg-purple-700 rounded-xl transition-colors duration-200 flex items-center justify-center"
-                >
-                  <i className="ri-send-plane-2-fill text-white text-xl"></i>
-                </button>
-              </div>
-            </div>
           </div>
         </>
       ) : (

@@ -16,20 +16,10 @@ https: app.use(cors());
 //the dqta came from fronted will be converted to json format
 app.use(express.json());
 
-// app.get("/", (req, res) => {
-//   console.log(chats);
-//   res.send("Home Page");
-// });
-
-// app.get("/api/chat", (req, res) => {
-//   res.send(chats);
-// });
-
-// app.get("/api/chat/:id", (req, res) => {
-//   const chat = chats.find((data) => data._id === req.params.id);
-//   res.send(chat);
-// });
-
+// server working test
+app.get("/", (req, res) => {
+  res.send("Server working ");
+});
 // routes for user Login and Register
 app.use("/api/user", userRoutes);
 //
@@ -67,19 +57,23 @@ io.on("connection", (socket) => {
     console.log("User joined room: " + room);
   });
 
-  socket.on("typing", (room => socket.in(room).emit("typing")));
-  socket.on("stop typing", (room => socket.in(room).emit("stop typing")));
+  socket.on("typing", (room) => socket.in(room).emit("typing"));
+  socket.on("stop typing", (room) => socket.in(room).emit("stop typing"));
 
   socket.on("new message", (newMessageRecived) => {
     var chat = newMessageRecived.chat;
 
-    if(!chat.users) return console.log("chat.users not defined");
-    
-    chat.users.forEach(user => {
-      if(user._id == newMessageRecived.sender._id) return;
+    if (!chat.users) return console.log("chat.users not defined");
 
-      socket.in(user._id).emit("message recived",newMessageRecived);
-    })
+    chat.users.forEach((user) => {
+      if (user._id == newMessageRecived.sender._id) return;
 
+      socket.in(user._id).emit("message recived", newMessageRecived);
+    });
   });
+
+  socket.on("delete message", ({ messageId, chatId }) => {
+    socket.to(chatId).emit("message deleted", { messageId, chatId });
+  });
+
 });
