@@ -1,56 +1,85 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ChatState } from "../../Context/ChatProvider";
 import { getSender, getSenderFull } from "../Config/ChatLogics";
 import ProfileModel from "./ProfileModel";
 import GroupSettingModel from "./GroupSettingModel";
 import axios from "axios";
+import toast, { Toaster } from "react-hot-toast";
+import io from "socket.io-client";
+import { motion } from "framer-motion";
+
+const ENDPOINT = "http://localhost:8080";
+var socket, selectedChatCompare;
+
+const TypingIndicator = () => (
+  <div className="flex items-center gap-2 py-2 px-4">
+    <div className="flex items-end gap-1">
+      <motion.div
+        className="w-3 h-3 bg-gradient-to-tr from-purple-500 to-purple-300 rounded-full shadow-lg"
+        animate={{
+          y: [-2, 2, -2],
+          opacity: [0.5, 1, 0.5],
+        }}
+        transition={{
+          duration: 1,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      />
+      <motion.div
+        className="w-3 h-3 bg-gradient-to-tr from-purple-500 to-purple-300 rounded-full shadow-lg"
+        animate={{
+          y: [-2, 2, -2],
+          opacity: [0.5, 1, 0.5],
+        }}
+        transition={{
+          duration: 1,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 0.2,
+        }}
+      />
+      <motion.div
+        className="w-3 h-3 bg-gradient-to-tr from-purple-500 to-purple-300 rounded-full shadow-lg"
+        animate={{
+          y: [-2, 2, -2],
+          opacity: [0.5, 1, 0.5],
+        }}
+        transition={{
+          duration: 1,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 0.4,
+        }}
+      />
+    </div>
+    <motion.span
+      className="text-sm text-zinc-400"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+    />
+  </div>
+);
 
 const SingleChat = ({ reload, setReload }) => {
   const [groupSetting, setGroupSetting] = useState(false);
   const [openProfile, setOpenProfile] = useState();
-  const { user, SelectedChat, setSelectedChat } = ChatState();
+  const {
+    user,
+    SelectedChat,
+    setSelectedChat,
+    notifications,
+    setNotifications,
+  } = ChatState();
 
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const [typing, setTyping] = useState(false);
 
-  const handleSendMessage = async () => {
-    if (newMessage.trim()) {
-      try {
-        const config = {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${user.token}`,
-          },
-        };
-
-        setNewMessage("");
-        const { data } = await axios.post(
-          "/api/message",
-          {
-            content: newMessage,
-            chatId: SelectedChat._id,
-          },
-          config
-        );
-
-        console.log(data);
-        setMessages([...messages, data]);
-      } catch (error) {
-        console.log(error);
-      }
-    }
-  };
-
-  const handleKeyPress = (event) => {
-    if (event.key === "Enter") {
-      handleSendMessage();
-    }
-  };
-
-  const typingHandler = (e) => {
-    setNewMessage(e.target.value);
-  };
+  const [socketConnected, setSocketConnected] = useState(false);
 
   const fetchMessage = async () => {
     if (!SelectedChat) {
@@ -71,18 +100,105 @@ const SingleChat = ({ reload, setReload }) => {
         config
       );
 
-      console.log(data);
-
       setMessages(data);
       setLoading(false);
+      socket.emit("join chat", SelectedChat._id);
     } catch (error) {
       console.log(error);
+      toast.error("Failed to fetch messages");
+      setLoading(false);
     }
   };
 
   useEffect(() => {
+    socket = io(ENDPOINT);
+    socket.emit("setup", user);
+    socket.on("connected", () => setSocketConnected(true));
+    socket.on("typing", () => setIsTyping(true));
+    socket.on("stop typing", () => setIsTyping(false));
+  }, []);
+
+  const handleSendMessage = async () => {
+    socket.emit("stop typing", SelectedChat._id);
+    if (newMessage.trim()) {
+      try {
+        const config = {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${user.token}`,
+          },
+        };
+
+        setNewMessage("");
+        const { data } = await axios.post(
+          "/api/message",
+          {
+            content: newMessage,
+            chatId: SelectedChat._id,
+          },
+          config
+        );
+
+        socket.emit("new message", data);
+        setMessages([...messages, data]);
+      } catch (error) {
+        console.log(error);
+        toast.error("Failed to send message");
+      }
+    }
+  };
+
+  const handleKeyPress = (event) => {
+    if (event.key === "Enter") {
+      handleSendMessage();
+    }
+  };
+
+  const typingHandler = (e) => {
+    setNewMessage(e.target.value);
+
+    if (!socketConnected) return;
+
+    if (!typing) {
+      setTyping(true);
+      socket.emit("typing", SelectedChat._id);
+    }
+
+    let lastTypingTime = new Date().getTime();
+    var timerLength = 3000;
+
+    setTimeout(() => {
+      var timeNow = new Date().getTime();
+      var timeDiff = timeNow - lastTypingTime;
+      if (timeDiff >= timerLength && typing) {
+        socket.emit("stop typing", SelectedChat._id);
+        setTyping(false);
+      }
+    }, timerLength);
+  };
+
+  useEffect(() => {
     fetchMessage();
+    selectedChatCompare = SelectedChat;
   }, [SelectedChat]);
+
+  useEffect(() => {
+    socket.on("message recived", (newMessageReceived) => {
+      if (
+        !selectedChatCompare ||
+        selectedChatCompare._id !== newMessageReceived.chat._id
+      ) {
+        //give notification
+        if (!notifications.includes(newMessageReceived)) {
+          setNotifications([...notifications, newMessageReceived]);
+          setReload(!reload);
+        }
+      } else {
+        setMessages([...messages, newMessageReceived]);
+      }
+    });
+  });
+  console.log(notifications);
 
   return (
     <>
@@ -188,22 +304,25 @@ const SingleChat = ({ reload, setReload }) => {
               </div>
             )}
 
-            <div className="w-full flex gap-3">
-              <input
-                className="p-3 bg-zinc-900 text-white placeholder-zinc-400 rounded-xl w-full border-2 border-zinc-700 outline-none focus:border-purple-500 transition-colors"
-                type="text"
-                placeholder="Type a message..."
-                onKeyDown={handleKeyPress}
-                onChange={typingHandler}
-                value={newMessage}
-                required
-              />
-              <button
-                onClick={handleSendMessage}
-                className="px-4 bg-purple-600 hover:bg-purple-700 rounded-xl transition-colors duration-200 flex items-center justify-center"
-              >
-                <i className="ri-send-plane-2-fill text-white text-xl"></i>
-              </button>
+            <div className="w-full flex flex-col gap-3">
+              {isTyping ? <TypingIndicator /> : <></>}
+              <div className="w-full flex gap-3">
+                <input
+                  className="p-3 bg-zinc-900 text-white placeholder-zinc-400 rounded-xl w-full border-2 border-zinc-700 outline-none focus:border-purple-500 transition-colors"
+                  type="text"
+                  placeholder="Type a message..."
+                  onKeyDown={handleKeyPress}
+                  onChange={typingHandler}
+                  value={newMessage}
+                  required
+                />
+                <button
+                  onClick={handleSendMessage}
+                  className="px-4 bg-purple-600 hover:bg-purple-700 rounded-xl transition-colors duration-200 flex items-center justify-center"
+                >
+                  <i className="ri-send-plane-2-fill text-white text-xl"></i>
+                </button>
+              </div>
             </div>
           </div>
         </>

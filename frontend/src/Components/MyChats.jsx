@@ -9,8 +9,6 @@ const MyChats = ({ reload }) => {
   const { user, SelectedChat, setSelectedChat, chats, setChats } = ChatState();
   const [isGropuchatOpen, setIsGropuchatOpen] = useState(false);
 
-  console.log(user);
-
   const fetchChat = async () => {
     try {
       const config = {
@@ -34,6 +32,8 @@ const MyChats = ({ reload }) => {
         SelectedChat ? "hidden md:block" : "w-full"
       }  md:w-1/3 bg-zinc-800 rounded-xl overflow-hidden`}
     >
+      {/* Create Group Button */}
+
       <div className="bg-zinc-900 w-full flex justify-between items-center p-3">
         <h1 className="text-3xl text-white font-semibold">Chats</h1>
         <button
@@ -47,8 +47,12 @@ const MyChats = ({ reload }) => {
           <GroupChatModel setIsGropuchatOpen={setIsGropuchatOpen} />
         )}
       </div>
-      <div className="p-3 flex flex-col gap-2">
-        {chats &&
+
+      {/* Chats */}
+
+      {/* <div className="p-3 flex flex-col gap-2 h-[calc(100vh-140px)]"> */}
+      <div className="p-3 flex flex-col gap-2 h-[calc(100vh-140px)] overflow-y-auto custom-scrollbar">
+        {chats && chats.length > 0 ? (
           chats.map((chat) =>
             chat.isGroupChat ? (
               <div
@@ -102,7 +106,17 @@ const MyChats = ({ reload }) => {
                 </div>
               </div>
             )
-          )}
+          )
+        ) : (
+          // No chats available
+          <div className="flex flex-col items-center justify-center text-center flex-1">
+            <i className="ri-chat-3-line text-6xl text-purple-500 mb-4"></i>
+            <p className="text-zinc-300 text-lg mb-2">No chats available</p>
+            <p className="text-zinc-400 text-sm">
+              Start a new conversation or join a group chat!
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

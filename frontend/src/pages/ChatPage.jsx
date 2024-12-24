@@ -13,7 +13,7 @@ const ChatPage = () => {
   return (
     <div className="w-full h-full bg-zinc-900 flex flex-col">
       {user && (
-        <SideBar openProfile={openProfile} setOpenProfile={setOpenProfile} />
+        <SideBar openProfile={openProfile} setOpenProfile={setOpenProfile} reload={reload} setReload={setReload}/>
       )}
       <div className="flex-1 flex  justify-center gap-2 w-full  bg-zinc-700 p-2">
         {user && <MyChats reload={reload} />}

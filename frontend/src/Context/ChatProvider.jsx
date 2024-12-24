@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
 const ChatContext = createContext();
@@ -8,6 +9,7 @@ const ChatProvider = ({ children }) => {
   const [SelectedChat, setSelectedChat] = useState("");
   const [chats, setChats] = useState([]);
   const navigate = useNavigate();
+  const [notifications, setNotifications] = useState([]);
 
   useEffect(() => {
     const userInfo = JSON.parse(localStorage.getItem("userInfo"));
@@ -27,7 +29,7 @@ const ChatProvider = ({ children }) => {
         localStorage.removeItem("userInfo");
         setUser(null);
         navigate("/"); // Redirect to login
-        alert("Session expired. Please log in again.");
+        toast.error("Session expired. Please log in again.");
       }
     } else {
       setUser(null);
@@ -37,7 +39,16 @@ const ChatProvider = ({ children }) => {
 
   return (
     <ChatContext.Provider
-      value={{ user, setUser, SelectedChat, setSelectedChat, chats, setChats }}
+      value={{
+        user,
+        setUser,
+        SelectedChat,
+        setSelectedChat,
+        chats,
+        setChats,
+        notifications,
+        setNotifications,
+      }}
     >
       {children}
     </ChatContext.Provider>

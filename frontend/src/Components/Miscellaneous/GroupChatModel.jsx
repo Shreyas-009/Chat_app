@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { ChatState } from "../../Context/ChatProvider";
 import axios from "axios";
+import toast from "react-hot-toast";
 
 const groupChatModel = ({ setIsGropuchatOpen }) => {
   const [groupName, setGroupName] = useState("");
@@ -41,7 +42,12 @@ const groupChatModel = ({ setIsGropuchatOpen }) => {
 
   const handleSubmit = async () => {
     if (!groupName || usersToAdd.length === 0) {
-      alert("Please provide a group name and add at least one user!");
+      toast.error("Please provide a group name and add at least one user!");
+      return;
+    }
+
+    if(usersToAdd.length <= 1) {
+      toast.error("Please add more than one user to create a group chat!");
       return;
     }
 
@@ -67,9 +73,10 @@ const groupChatModel = ({ setIsGropuchatOpen }) => {
       setChats([data, ...chats]); // Update the chat list with the new group
       setIsGropuchatOpen(false); // Close the modal
       setLoading(false);
+      toast.success("Group has been created");
     } catch (error) {
       console.error("Error creating group chat:", error.message);
-      alert("Failed to create the group chat. Please try again.");
+      toast.error("Failed to create the group chat. Please try again.");
       setLoading(false);
     }
   };

@@ -1,6 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const User = require("../models/userModel");
 const Chat = require("../models/chatModel");
+const Message = require("../models/messageModel");
 
 
 const accessChat = asyncHandler(async (req, res) => {
@@ -158,6 +159,40 @@ const removeFromGroup = asyncHandler(async (req, res) => {
   }
 }); 
 
+
+const changeGroupAdmin = asyncHandler(async (req, res) => {
+  const { chatId, userId } = req.body;
+
+  const updatedChat = await Chat.findByIdAndUpdate(
+    chatId,
+    { groupAdmin: userId },
+    { new: true }
+  )
+    .populate("users", "-password")
+    .populate("groupAdmin", "-password");
+
+  if (!updatedChat) {
+    return res.status(404).json({ message: "Chat not found." });
+  } else {
+    res.status(200).json(updatedChat);
+  }
+});
+
+//delete group
+const deleteGroup = asyncHandler(async (req, res) => {
+  const chatId = req.params.chatId;
+
+  const chat = await Chat.findByIdAndDelete(chatId);
+  if (!chat) {
+    res.status(404);
+    throw new Error("Chat not found");
+  }
+
+  await Message.deleteMany({ chat: chatId });
+  res.status(200).json({ message: "Group and messages deleted" });
+});
+
+
 module.exports = {
   accessChat,
   fetchChat,
@@ -165,4 +200,6 @@ module.exports = {
   renameGroup,
   addToGroup,
   removeFromGroup,
+  changeGroupAdmin,
+  deleteGroup,
 };

@@ -7,3 +7,27 @@
         display: none;
     }
 }
+
+@layer utilities {
+  /* Scrollbar width */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  /* Scrollbar track */
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply
+    bg-zinc-900
+  }
+
+  /* Scrollbar handle */
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #a855f7; /* purple-500 */
+    border-radius: 100px;
+  }
+
+  /* Handle on hover */
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #9333ea; /* purple-600 */
+  }
+}
