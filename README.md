@@ -50,11 +50,11 @@ A powerful real-time chat application designed to enhance communication through 
 
 ## 📱 Screenshots
 
-![Chat Interface](./backend/frontend/public/ChatInterface.png)  
+![Chat Interface](./frontend/public/ChatInterface.png)  
 *Main chat interface with real-time messaging.*
 
-![Group Chat](./backend/frontend/public/GroupChat.png)  
+![Group Chat](./frontend/public/GroupChat.png)  
 *Group chat functionality with admin controls.*
 
-![Group Chat Settings](./backend/frontend/public/GroupChatSetting.png)  
+![Group Chat Settings](./frontend/public/GroupChatSetting.png)  
 *Group chat settings for admin controls like adding/removing members.*

@@ -8,7 +8,7 @@ import toast, { Toaster } from "react-hot-toast";
 import io from "socket.io-client";
 import { motion } from "framer-motion";
 
-const ENDPOINT = "http://localhost:8080";
+const ENDPOINT = "https://chat-app-ng66.onrender.com";
 var socket, selectedChatCompare;
 
 const TypingIndicator = () => (

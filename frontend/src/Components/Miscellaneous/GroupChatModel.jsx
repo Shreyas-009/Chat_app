@@ -46,7 +46,7 @@ const groupChatModel = ({ setIsGropuchatOpen }) => {
       return;
     }
 
-    if(usersToAdd.length <= 1) {
+    if (usersToAdd.length <= 1) {
       toast.error("Please add more than one user to create a group chat!");
       return;
     }
@@ -62,7 +62,7 @@ const groupChatModel = ({ setIsGropuchatOpen }) => {
       };
 
       const { data } = await axios.post(
-        "http://localhost:8080/api/chat/group",
+        "https://chat-app-ng66.onrender.com/api/chat/group",
         {
           name: groupName,
           users: JSON.stringify(usersToAdd.map((user) => user._id)),

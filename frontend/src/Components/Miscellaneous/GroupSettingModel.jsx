@@ -54,7 +54,7 @@ const GroupSettingModel = ({
       };
 
       await axios.put(
-        `http://localhost:8080/api/chat/rename`,
+        `https://chat-app-ng66.onrender.com/api/chat/rename`,
         {
           chatId: SelectedChat._id,
           chatName: groupName,
@@ -88,7 +88,7 @@ const GroupSettingModel = ({
         };
 
         await axios.delete(
-          `http://localhost:8080/api/chat/group/${SelectedChat._id}`,
+          `https://chat-app-ng66.onrender.com/api/chat/group/${SelectedChat._id}`,
           config
         );
         setSelectedChat(null);
@@ -137,7 +137,7 @@ const GroupSettingModel = ({
       };
 
       const { data } = await axios.put(
-        `http://localhost:8080/api/chat/groupadd`,
+        `https://chat-app-ng66.onrender.com/api/chat/groupadd`,
         {
           chatId: SelectedChat._id,
           userId: user1._id,
@@ -178,7 +178,7 @@ const GroupSettingModel = ({
         },
       };
       const { data } = await axios.put(
-        `http://localhost:8080/api/chat/groupremove`,
+        `https://chat-app-ng66.onrender.com/api/chat/groupremove`,
         {
           chatId: SelectedChat._id,
           userId: user1._id,
@@ -217,7 +217,7 @@ const GroupSettingModel = ({
       };
 
       await axios.put(
-        `http://localhost:8080/api/chat/changeadmin`,
+        `https://chat-app-ng66.onrender.com/api/chat/changeadmin`,
         {
           chatId: SelectedChat._id,
           userId: selectedNewAdmin._id,

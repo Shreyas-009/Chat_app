@@ -17,6 +17,10 @@ https: app.use(cors());
 //the dqta came from fronted will be converted to json format
 app.use(express.json());
 
+ // server working test
+  app.get("/", (req, res) => {
+    res.send("Server working ");
+  });
 
 // routes for user Login and Register
 app.use("/api/user", userRoutes);
@@ -24,28 +28,6 @@ app.use("/api/user", userRoutes);
 app.use("/api/chat", chatRoutes);
 
 app.use("/api/message", messageRoutes);
-
-
-// // --------------------------deployment------------------------------
-
-// const __dirname1 = path.resolve();
-
-// if (process.env.NODE_ENV === "production") {
-//   app.use(express.static(path.join(__dirname1, "/frontend/build")));
-
-//   app.get("*", (req, res) =>
-//     res.sendFile(path.resolve(__dirname1, "frontend", "dist", "index.html"))
-//   );
-// } else {
-//   // server working test
-//   app.get("/", (req, res) => {
-//     res.send("Server working ");
-//   });
-// }
-
-// // --------------------------deployment------------------------------
-
-
 
 // Middleware for handling 404 Not Found errors
 app.use(notFound);
@@ -60,7 +42,7 @@ const server = app.listen(
 const io = require("socket.io")(server, {
   pingTimeout: 50000,
   cors: {
-    origin: "http://localhost:5173",
+    origin: "https://chat-appplication.onrender.com",
   },
 });
 

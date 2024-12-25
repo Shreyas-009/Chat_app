@@ -20,7 +20,7 @@ const Login = () => {
       };
 
       const res = await axios.post(
-        "http://localhost:8080/api/user/login",
+        "https://chat-app-ng66.onrender.com/api/user/login",
         {
           email: email,
           password: password,

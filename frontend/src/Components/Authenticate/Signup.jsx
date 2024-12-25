@@ -60,7 +60,7 @@ const SignUp = () => {
       };
 
       const userRes = await axios.post(
-        "http://localhost:8080/api/user/",
+        "https://chat-app-ng66.onrender.com/api/user/",
         {
           name: name,
           email: email,
