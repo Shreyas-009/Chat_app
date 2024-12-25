@@ -39,7 +39,10 @@ const SideBar = ({ openProfile, setOpenProfile, reload, setReload }) => {
           Authorization: `Bearer ${user.token}`,
         },
       };
-      const { data } = await axios.get(`/api/user?search=${search}`, config);
+      const { data } = await axios.get(
+        `https://chat-app-ng66.onrender.com/api/user?search=${search}`,
+        config
+      );
       setSearchResult(data);
       setSearch("");
       setLoading(false);
