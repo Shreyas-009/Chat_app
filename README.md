@@ -46,7 +46,7 @@ A powerful real-time chat application designed to enhance communication through 
 - CORS for seamless cross-origin resource sharing.
 
 ## 🌐 Live Demo
-[View Live Demo](https://talkhub-chat.vercel.app/)
+[View Live Demo](https://chat-appplication.onrender.com/)
 
 ## 📱 Screenshots
 
