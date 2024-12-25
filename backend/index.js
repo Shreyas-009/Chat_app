@@ -9,6 +9,7 @@ const userRoutes = require("./routes/userRoutes");
 const chatRoutes = require("./routes/chatRoutes");
 const messageRoutes = require("./routes/messageRouts");
 const { notFound, errorHandler } = require("./middleware/errormiddleware");
+const path = require("path");
 
 //cores used for giving access to frontend of ower databases
 https: app.use(cors());
@@ -16,16 +17,35 @@ https: app.use(cors());
 //the dqta came from fronted will be converted to json format
 app.use(express.json());
 
-// server working test
-app.get("/", (req, res) => {
-  res.send("Server working ");
-});
+
 // routes for user Login and Register
 app.use("/api/user", userRoutes);
 //
 app.use("/api/chat", chatRoutes);
 
 app.use("/api/message", messageRoutes);
+
+
+// --------------------------deployment------------------------------
+
+const __dirname1 = path.resolve();
+
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname1, "/frontend/build")));
+
+  app.get("*", (req, res) =>
+    res.sendFile(path.resolve(__dirname1, "frontend", "dist", "index.html"))
+  );
+} else {
+  // server working test
+  app.get("/", (req, res) => {
+    res.send("Server working ");
+  });
+}
+
+// --------------------------deployment------------------------------
+
+
 
 // Middleware for handling 404 Not Found errors
 app.use(notFound);
