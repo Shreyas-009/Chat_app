@@ -61,7 +61,11 @@ const SideBar = ({ openProfile, setOpenProfile, reload, setReload }) => {
         },
       };
 
-      const { data } = await axios.post(`/api/chat`, { userId }, config);
+      const { data } = await axios.post(
+        `https://chat-app-ng66.onrender.com/api/chat`,
+        { userId },
+        config
+      );
 
       setSearchResult([]);
       setSelectedChat(data);
