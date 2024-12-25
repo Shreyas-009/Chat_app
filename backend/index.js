@@ -9,7 +9,7 @@ const userRoutes = require("./routes/userRoutes");
 const chatRoutes = require("./routes/chatRoutes");
 const messageRoutes = require("./routes/messageRouts");
 const { notFound, errorHandler } = require("./middleware/errormiddleware");
-const path = require("path");
+// const path = require("path");
 
 //cores used for giving access to frontend of ower databases
 https: app.use(cors());
@@ -26,24 +26,24 @@ app.use("/api/chat", chatRoutes);
 app.use("/api/message", messageRoutes);
 
 
-// --------------------------deployment------------------------------
+// // --------------------------deployment------------------------------
 
-const __dirname1 = path.resolve();
+// const __dirname1 = path.resolve();
 
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname1, "/frontend/build")));
+// if (process.env.NODE_ENV === "production") {
+//   app.use(express.static(path.join(__dirname1, "/frontend/build")));
 
-  app.get("*", (req, res) =>
-    res.sendFile(path.resolve(__dirname1, "frontend", "dist", "index.html"))
-  );
-} else {
-  // server working test
-  app.get("/", (req, res) => {
-    res.send("Server working ");
-  });
-}
+//   app.get("*", (req, res) =>
+//     res.sendFile(path.resolve(__dirname1, "frontend", "dist", "index.html"))
+//   );
+// } else {
+//   // server working test
+//   app.get("/", (req, res) => {
+//     res.send("Server working ");
+//   });
+// }
 
-// --------------------------deployment------------------------------
+// // --------------------------deployment------------------------------
 
 
 

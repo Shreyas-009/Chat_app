@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "serve": "nodemon index.js",
-    "build": "npm install --legacy-peer-deps && npm install --legacy-peer-deps --prefix ./frontend && npm install -g vite && npm run build --prefix ./frontend"
+    "serve": "nodemon index.js"
   },
   "author": "Shreyas Tungar",
   "license": "ISC",
