@@ -46,7 +46,7 @@ A powerful real-time chat application designed to enhance communication through 
 - CORS for seamless cross-origin resource sharing.
 
 ## 🌐 Live Demo
-[View Live Demo](https://chat-appplication.onrender.com/)
+[View Live Demo](https://chat-app-peach-psi.vercel.app/)
 
 ## 📱 Screenshots
 
