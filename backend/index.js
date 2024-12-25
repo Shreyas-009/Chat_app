@@ -8,7 +8,7 @@ const { chats } = require("./data/data");
 const userRoutes = require("./routes/userRoutes");
 const chatRoutes = require("./routes/chatRoutes");
 const messageRoutes = require("./routes/messageRouts");
-const { notFound, errorHandler } = require("./middleware/errormiddleware");
+const { notFound, errorHandler } = require("./middleware/errorMiddleware");
 // const path = require("path");
 
 //cores used for giving access to frontend of ower databases
