@@ -392,7 +392,7 @@ const SingleChat = ({ reload, setReload }) => {
                         )}
 
                         {isCurrentUser && (
-                          <div className="relative group max-w-[70%] min-w-[120px]">
+                          <div className=" group max-w-[70%] min-w-[120px]">
                             <div className="rounded-lg px-3 py-1.5 bg-purple-600 text-white">
                               <div className="break-words text-sm whitespace-pre-wrap">
                                 {message.content}

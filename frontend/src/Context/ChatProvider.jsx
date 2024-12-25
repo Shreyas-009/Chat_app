@@ -13,10 +13,16 @@ const ChatProvider = ({ children }) => {
 
   useEffect(() => {
     const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+    const currentPath = window.location.pathname;
 
+     if (!userInfo && currentPath === "/login") {
+       return; // Skip authentication check for login page
+     }
+     
     if (userInfo) {
       setUser(userInfo);
 
+   
       // Check token expiration
       const token = userInfo.token;
       const isTokenExpired = () => {
