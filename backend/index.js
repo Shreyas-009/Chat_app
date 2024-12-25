@@ -12,7 +12,8 @@ const { notFound, errorHandler } = require("./middleware/errorMiddleware");
 // const path = require("path");
 
 //cores used for giving access to frontend of ower databases
-https: app.use(cors());
+https: 
+app.use(cors());
 
 //the dqta came from fronted will be converted to json format
 app.use(express.json());

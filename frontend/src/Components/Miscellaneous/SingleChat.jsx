@@ -103,7 +103,7 @@ const SingleChat = ({ reload, setReload }) => {
 
       setLoading(true);
       const { data } = await axios.get(
-        `/api/message/${SelectedChat._id}`,
+        `https://chat-app-ng66.onrender.com/api/message/${SelectedChat._id}`,
         config
       );
       setMessages(data);
@@ -170,7 +170,7 @@ const SingleChat = ({ reload, setReload }) => {
 
         setNewMessage("");
         const { data } = await axios.post(
-          "/api/message",
+          "https://chat-app-ng66.onrender.com/api/message",
           {
             content: newMessage,
             chatId: SelectedChat._id,
@@ -225,7 +225,10 @@ const SingleChat = ({ reload, setReload }) => {
         },
       };
 
-      await axios.delete(`/api/message/${messageId}`, config);
+      await axios.delete(
+        `https://chat-app-ng66.onrender.com/api/message/${messageId}`,
+        config
+      );
 
       // Update local state immediately for sender
       setMessages((prevMessages) =>

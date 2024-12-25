@@ -14,7 +14,10 @@ const MyChats = ({ reload }) => {
       const config = {
         headers: { Authorization: `Bearer ${user.token}` },
       };
-      const { data } = await axios.get(`/api/chat`, config);
+      const { data } = await axios.get(
+        `https://chat-app-ng66.onrender.com/api/chat`,
+        config
+      );
       setChats(data);
     } catch (error) {
       console.log(error);
