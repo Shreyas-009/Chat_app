@@ -24,7 +24,7 @@ const LoginPage = () => {
         <div className="left_container md:w-1/2 bg-purple-500">
           <img
             className="h-full object-contain"
-            src="\src\assets\Register.jpg"
+            src="Register.jpg"
             alt=""
           />
         </div>
