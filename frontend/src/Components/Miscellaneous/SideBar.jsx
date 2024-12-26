@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { ChatState } from "../../Context/ChatProvider";
 import axios from "axios";
 import SearchModal from "./SearchModal";
