@@ -12,7 +12,7 @@ const SearchModal = ({
 }) => {
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 z-50"
+      className=" inset-0 bg-black bg-opacity-50 z-50"
       onClick={() => setOpenSearch(false)}
     >
       <div
