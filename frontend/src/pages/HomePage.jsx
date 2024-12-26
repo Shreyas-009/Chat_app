@@ -121,7 +121,7 @@ const HomePage = () => {
         <div
           className={`container mx-auto text-center transform transition-all duration-1000`}
         >
-          <h1 className="text-9xl md:text-7xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r  from-purple-400 to-purple-600 animate-gradient italic">
+          <h1 className="text-6xl md:text-8xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r  from-purple-400 to-purple-600 animate-gradient italic">
             SwiftChat
           </h1>
           <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-purple-600 animate-gradient">
