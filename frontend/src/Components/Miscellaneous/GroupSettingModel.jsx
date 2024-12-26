@@ -73,6 +73,7 @@ const GroupSettingModel = ({
       console.error("Error renaming group chat:", error.message);
       toast.error("Failed to rename the group chat. Please try again.");
       setLoading(false);
+      setReload(!reload); // Reload the)
     }
   };
 

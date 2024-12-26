@@ -157,33 +157,93 @@ const SingleChat = ({ reload, setReload }) => {
     };
   }, [selectedChatCompare, notifications, SelectedChat]);
 
+  //previous messages api
+  // const handleSendMessage = async () => {
+  //   socket.emit("stop typing", SelectedChat._id);
+  //   if (newMessage.trim()) {
+  //     try {
+  //       const config = {
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: `Bearer ${user.token}`,
+  //         },
+  //       };
+
+  //       setNewMessage("");
+  //       const { data } = await axios.post(
+  //         "https://chat-app-ng66.onrender.com/api/message",
+  //         {
+  //           content: newMessage,
+  //           chatId: SelectedChat._id,
+  //         },
+  //         config
+  //       );
+
+  //       socket.emit("new message", data);
+  //       setMessages([...messages, data]);
+  //     } catch (error) {
+  //       console.log(error);
+  //       toast.error("Failed to send message");
+  //     }
+  //   }
+  // };
+
+  // updated message handler with immediate ui change 
   const handleSendMessage = async () => {
     socket.emit("stop typing", SelectedChat._id);
-    if (newMessage.trim()) {
-      try {
-        const config = {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${user.token}`,
-          },
-        };
 
-        setNewMessage("");
-        const { data } = await axios.post(
-          "https://chat-app-ng66.onrender.com/api/message",
-          {
-            content: newMessage,
-            chatId: SelectedChat._id,
-          },
-          config
-        );
+    if (!newMessage.trim()) return;
 
-        socket.emit("new message", data);
-        setMessages([...messages, data]);
-      } catch (error) {
-        console.log(error);
-        toast.error("Failed to send message");
-      }
+    // Create temporary message object for optimistic update
+    const tempMessage = {
+      _id: `temp-${Date.now()}`, // Temporary ID
+      content: newMessage,
+      sender: {
+        _id: user._id,
+        name: user.name,
+        picture: user.picture,
+      },
+      chat: SelectedChat,
+      createdAt: new Date().toISOString(),
+    };
+
+    try {
+      // Update UI immediately
+      setNewMessage("");
+      setMessages((prevMessages) => [...prevMessages, tempMessage]);
+
+      // Prepare request config
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+      };
+
+      // Make API call in parallel
+      const { data } = await axios.post(
+        "https://chat-app-ng66.onrender.com/api/message",
+        {
+          content: tempMessage.content,
+          chatId: SelectedChat._id,
+        },
+        config
+      );
+
+      // Replace temporary message with real one from server
+      setMessages((prevMessages) =>
+        prevMessages.map((msg) => (msg._id === tempMessage._id ? data : msg))
+      );
+
+      // Emit socket event with the real message
+      socket.emit("new message", data);
+    } catch (error) {
+      // Remove temporary message if request fails
+      setMessages((prevMessages) =>
+        prevMessages.filter((msg) => msg._id !== tempMessage._id)
+      );
+      toast.error("Failed to send message");
+      console.error(error);
     }
   };
 
