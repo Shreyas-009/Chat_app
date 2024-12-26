@@ -65,6 +65,7 @@ const GroupSettingModel = ({
         config
       );
 
+      setSelectedChat("");
       setReload(!reload); // Reload the)
       setIsGropuchatOpen(false); // Close the modal
       setLoading(false);
@@ -73,7 +74,6 @@ const GroupSettingModel = ({
       console.error("Error renaming group chat:", error.message);
       toast.error("Failed to rename the group chat. Please try again.");
       setLoading(false);
-      setReload(!reload); // Reload the)
     }
   };
 

@@ -78,12 +78,6 @@ const SideBar = ({ openProfile, setOpenProfile, reload, setReload }) => {
     }
   };
 
-  useEffect(() => {
-    if (SelectedChat) {
-      accessChat(SelectedChat.users[1]._id);
-    }
-  }, [reload]);
-
    return (
      <>
        <div className="flex justify-between w-full bg-zinc-800 p-2 relative">
