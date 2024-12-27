@@ -1,4 +1,4 @@
-# Chat App 💬
+# SwiftChat 💬
 
 A powerful real-time chat application designed to enhance communication through private and group chats, built with the MERN stack. TalkHub emphasizes user-friendly features and secure, seamless interactions.
 
