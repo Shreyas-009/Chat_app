@@ -15,6 +15,9 @@ const ChatProvider = ({ children }) => {
     const userInfo = JSON.parse(localStorage.getItem("userInfo"));
     const currentPath = window.location.pathname;
 
+    // console.log(user);
+    
+
      if (!userInfo && currentPath === "/login") {
        return; // Skip authentication check for login page
      }
