@@ -235,7 +235,7 @@ const GroupSettingModel = ({
       setShowAdminTransfer(false);
       setSelectedNewAdmin(null);
       setLoading(false);
-      setReload(!reload);
+      // setReload(!reload);
     } catch (error) {
       console.error("Error transferring admin:", error.message);
       toast.error("Failed to transfer admin. Please try again.");
