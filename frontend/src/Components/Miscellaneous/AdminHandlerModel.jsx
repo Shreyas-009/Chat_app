@@ -10,7 +10,10 @@ const AdminHandlerModel = ({
   setShowAdminTransfer,
 }) => {
   return (
-    <div className="relative w-full max-w-md text-white bg-zinc-800 p-5 rounded-xl">
+    <div
+      className="relative w-full max-w-md text-white bg-zinc-800 p-5 rounded-xl"
+      onClick={(e) => e.stopPropagation()}
+    >
       <div className="flex flex-col gap-4 w-full">
         <h2 className="text-xl text-purple-400 font-semibold">
           Select New Admin

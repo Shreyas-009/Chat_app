@@ -166,12 +166,6 @@ const GroupSettingModel = ({
       });
       return;
     }
-    if (user1._id === user._id) {
-      toast("Please select Leave group option", {
-        icon: "⚠️",
-      });
-      return;
-    }
 
     try {
       setLoading(true);
@@ -205,7 +199,7 @@ const GroupSettingModel = ({
   };
 
   // Update the group chat Admin
-  const handleAdminTransfer = async () => {
+    const handleAdminTransfer = async () => {
     if (!selectedNewAdmin) {
       toast.error("Please select a new admin");
       return;
@@ -220,7 +214,8 @@ const GroupSettingModel = ({
         },
       };
 
-      await axios.put(
+      // First transfer admin rights
+      const { data } = await axios.put(
         `https://chat-app-ng66.onrender.com/api/chat/changeadmin`,
         {
           chatId: SelectedChat._id,
@@ -229,19 +224,33 @@ const GroupSettingModel = ({
         config
       );
 
-      // After admin transfer, proceed with leaving the group
-      await handleRemoveUser(user);
+      if (data) {
+        // Then remove current user from group
+        await axios.put(
+          `https://chat-app-ng66.onrender.com/api/chat/groupremove`,
+          {
+            chatId: SelectedChat._id,
+            userId: user._id,
+          },
+          config
+        );
 
-      setShowAdminTransfer(false);
-      setSelectedNewAdmin(null);
+        setSelectedChat(null);
+        setShowAdminTransfer(false);
+        setSelectedNewAdmin(null);
+        setIsGropuchatOpen(false);
+        setReload(!reload);
+        toast.success("Admin transferred and left group successfully");
+      }
+      
       setLoading(false);
-      // setReload(!reload);
     } catch (error) {
       console.error("Error transferring admin:", error.message);
       toast.error("Failed to transfer admin. Please try again.");
       setLoading(false);
     }
   };
+
 
   return (
     <div

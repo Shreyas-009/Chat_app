@@ -44,10 +44,10 @@ const Login = () => {
     }
   };
 
-  const handleGuestLogin = () => {
-    setValue("email", "Guest@gmail.com");
-    setValue("password", "guest123");
-  };
+  // const handleGuestLogin = () => {
+  //   setValue("email", "Guest@gmail.com");
+  //   setValue("password", "guest123");
+  // };
 
   return (
     <form
@@ -113,12 +113,26 @@ const Login = () => {
       >
         Login
       </button>
-      <button
+      {/* <button
         type="button"
-        onClick={handleGuestLogin}
+        // onClick={handleGuestLogin}
         className="p-2 md:p-4 outline-none text-purple-700 border border-purple-700 rounded-xl"
+        disabled
       >
         Login As Guest User
+      </button> */}
+      <button
+        type="button"
+        className="relative p-2 md:p-4 outline-none text-gray-400 border border-gray-400 rounded-xl cursor-not-allowed group"
+        disabled
+      >
+        <span className="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap bg-gray-700 text-white text-sm px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+          Temporarily unavailable 
+        </span>
+        <div className="flex items-center justify-center gap-2">
+          <i className="ri-user-line" />
+          <span>Login As Guest User</span>
+        </div>
       </button>
     </form>
   );
