@@ -12,11 +12,11 @@ const SearchModal = ({
 }) => {
   return (
     <div
-      className=" inset-0 bg-black bg-opacity-50 z-50"
+      className="fixed inset-0 bg-black bg-opacity-70 z-50"
       onClick={() => setOpenSearch(false)}
     >
       <div
-        className="bg-zinc-800 text-white h-[100vh] absolute left-0 top-0 p-4 w-full sm:w-1/5 min-w-fit z-50"
+        className="bg-zinc-800 text-white h-full w-full sm:w-1/5 min-w-fit z-50 fixed left-0 top-0 p-4"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex w-full justify-between pb-7">
